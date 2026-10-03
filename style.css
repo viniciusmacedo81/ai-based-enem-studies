@@ -1,0 +1,96 @@
+/* Importando uma fonte mais arredondada e amigável */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+
+body {
+    font-family: 'Nunito', sans-serif;
+    /* Um fundo com gradiente sutil em vez de cinza chapado */
+    background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.container {
+    max-width: 700px;
+    width: 100%;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 16px; /* Bordas mais arredondadas */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Sombra mais profunda e suave */
+    box-sizing: border-box;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    font-weight: 800;
+}
+
+ul {
+    padding: 0;
+}
+
+li {
+    list-style-type: none;
+}
+
+/* Botões base */
+button {
+    display: block;
+    width: 100%;
+    padding: 15px 20px;
+    margin: 12px 0;
+    background-color: #f8f9fa; /* Fundo clarinho */
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Sombreado de botão físico */
+}
+
+/* Efeito ao passar o mouse */
+button:hover:not(:disabled) {
+    background-color: #e9ecef;
+    transform: translateY(-2px); /* Dá uma leve "levantada" no botão */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+/* =========================================
+   CLASSES DE GAMIFICAÇÃO (INSERIDAS PELO JS)
+   ========================================= */
+
+/* Quando acerta: Fica verde e dá uma leve crescida */
+.btn-correct {
+    background-color: #4cd137 !important;
+    color: white !important;
+    border-color: #44bd32 !important;
+    transform: scale(1.02);
+}
+
+/* Quando erra: Fica vermelho e treme */
+.btn-wrong {
+    background-color: #e84118 !important;
+    color: white !important;
+    border-color: #c23616 !important;
+    animation: shake 0.4s; /* Chama a animação abaixo */
+}
+
+/* Animação de tremor (shake) */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}

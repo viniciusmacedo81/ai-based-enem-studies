@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Quiz ENEM</title>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- MENU INICIAL (Aparece primeiro) -->
+        <div id="menu-container">
+            <h1>Escolha seu Treino 📚</h1>
+            <p>Selecione o que você quer focar hoje:</p>
+            <button class="menu-btn" onclick="iniciarQuiz('ambos')"> Ambos os Dias (Geral)</button>
+            <button class="menu-btn" onclick="iniciarQuiz('dia1')"> 1º Dia (Linguagens e Humanas)</button>
+            <button class="menu-btn" onclick="iniciarQuiz('dia2')"> 2º Dia (Matemática e Natureza)</button>
+        </div>
+
+        <!-- TELA DO QUIZ (Fica escondida até você escolher uma opção) -->
+        <div id="quiz-screen" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1 style="margin: 0;">Quiz ENEM</h1>
+                <!-- Botão para voltar ao menu -->
+                <button id="btn-voltar" onclick="voltarAoMenu()" style="width: auto; padding: 8px 15px; background-color: #6c757d;">🏠 Menu</button>
+            </div>
+            
+            <div id="question-container">
+                <p id="question">Carregando...</p>
+                <ul id="answer-buttons" class="answer-buttons"></ul>
+                <div id="scratchpad-container" style="margin-top: 25px; text-align: center;">
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Área de Rascunho (Cálculos):</p>
+    <canvas id="drawing-canvas" width="600" height="160" style="border: 2px dashed #cbd5e1; background-color: #fff; border-radius: 8px; cursor: crosshair; max-width: 100%;"></canvas>
+    <br>
+    <button id="clear-canvas" style="width: auto; padding: 6px 14px; font-size: 13px; background-color: #64748b; margin-top: 8px;">Limpar Rascunho</button>
+</div>
+            </div>
+            <p class="score">Streak de Acertos: <span id="score">0</span></p>
+        </div>
+
+    </div>
+</body>
+</html>
+<script src="script.js"></script>
