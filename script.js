@@ -34,6 +34,9 @@ function voltarAoMenu() {
 // ==========================================
 // CARREGAR QUESTÃO DO ENEM + IA PREPARATÓRIA
 // ==========================================
+// ==========================================
+// CARREGAR QUESTÃO DO ENEM + IA PREPARATÓRIA
+// ==========================================
 async function carregarQuestao() {
     questionElement.innerHTML = "Sorteando questão do ENEM...";
     answerButtonsElement.innerHTML = ""; 
@@ -90,10 +93,20 @@ async function carregarQuestao() {
             })
         });
 
+        // Lemos a resposta
         questaoIAAtual = await respostaIA.json();
         
-        // Exibe a questão da IA antes da questão real
-        mostrarQuestaoPreparatoria();
+        // DEBUG: Imprime a resposta da IA no console para investigarmos!
+        console.log("Resposta bruta da API / Gemini:", questaoIAAtual);
+
+        // TRAVA DE SEGURANÇA (O Plano B)
+        // Se a resposta for OK e o array 'alternativas' realmente existir:
+        if (respostaIA.ok && questaoIAAtual && questaoIAAtual.alternativas) {
+            mostrarQuestaoPreparatoria();
+        } else {
+            console.warn("A IA retornou um formato inesperado ou deu erro. Pulando para a questão oficial.");
+            mostrarQuestao(questaoEnemAtual); // Pula direto pro ENEM
+        }
 
     } catch (erro) {
         console.error("Erro ao carregar a questão:", erro);
