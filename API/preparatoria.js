@@ -43,6 +43,8 @@ export default async function handler(req, res) {
             
             REGRA DE OURO (MUITO IMPORTANTE): O aluno AINDA NÃO PODE VER as imagens da questão durante o aquecimento. Portanto, NUNCA faça referências visuais como "na imagem abaixo", "no canto esquerdo" ou "como podemos ver no gráfico". Crie uma questão puramente teórica e autossuficiente que aborde o mesmo conceito da imagem, mas sem depender dela visualmente.
             
+            NÃO use emojis em nenhum campo do texto.
+            
             IMPORTANTE: Retorne APENAS um objeto JSON válido. Não use blocos de código (\`\`\`json) e não escreva nenhum texto antes ou depois. Use EXATAMENTE este formato:
             {
                 "texto_preparatorio": "Breve explicação do conceito de forma simples (max 3 linhas).",

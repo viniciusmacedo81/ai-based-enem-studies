@@ -1,35 +1,72 @@
-/* Importando uma fonte mais arredondada e amigável */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+/* =========================================
+   TOKENS
+   ========================================= */
+:root {
+    --fundo: #ffffff;
+    --superficie: #f6f7f8;
+    --tinta: #15181c;
+    --tinta-suave: #5d646d;
+    --linha: #e2e5e9;
+    --linha-forte: #15181c;
+    --destaque: #2f3fd1;
+    --acerto: #1d7347;
+    --acerto-fundo: #eef7f2;
+    --erro: #b3261e;
+    --erro-fundo: #fcf0ef;
 
-body {
-    font-family: 'Nunito', sans-serif;
-    /* Um fundo com gradiente sutil em vez de cinza chapado */
-    background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 }
 
-.container {
-    max-width: 700px;
-    width: 100%;
-    margin: 30px auto;
-    padding: 30px;
-    background-color: #ffffff;
-    border-radius: 16px; /* Bordas mais arredondadas */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Sombra mais profunda e suave */
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
-h1, h2 {
-    color: #2c3e50;
-    font-weight: 800;
+body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--tinta);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+}
+
+/* =========================================
+   TIPOGRAFIA
+   ========================================= */
+h1 {
+    margin: 0 0 8px;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+h2 {
+    margin: 0 0 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+p {
+    margin: 0 0 16px;
+}
+
+.subtitulo {
+    margin-bottom: 32px;
+    color: var(--tinta-suave);
 }
 
 ul {
+    margin: 0;
     padding: 0;
 }
 
@@ -37,60 +74,253 @@ li {
     list-style-type: none;
 }
 
-/* Botões base */
+/* =========================================
+   BOTÕES: BASE
+   ========================================= */
 button {
-    display: block;
-    width: 100%;
-    padding: 15px 20px;
-    margin: 12px 0;
-    background-color: #f8f9fa; /* Fundo clarinho */
-    color: #2c3e50;
-    font-size: 16px;
-    font-weight: 700;
-    text-align: left;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
+    font: inherit;
+    color: inherit;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Sombreado de botão físico */
 }
 
-/* Efeito ao passar o mouse */
-button:hover:not(:disabled) {
-    background-color: #e9ecef;
-    transform: translateY(-2px); /* Dá uma leve "levantada" no botão */
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+button:focus-visible,
+canvas:focus-visible {
+    outline: 2px solid var(--destaque);
+    outline-offset: 2px;
 }
 
-button:disabled {
-    cursor: not-allowed;
+/* Botão discreto, só texto */
+.btn-texto {
+    padding: 6px 10px;
+    margin: 0 -10px;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.btn-texto:hover {
+    color: var(--tinta);
+    background: var(--superficie);
 }
 
 /* =========================================
-   CLASSES DE GAMIFICAÇÃO (INSERIDAS PELO JS)
+   MENU
    ========================================= */
-
-/* Quando acerta: Fica verde e dá uma leve crescida */
-.btn-correct {
-    background-color: #4cd137 !important;
-    color: white !important;
-    border-color: #44bd32 !important;
-    transform: scale(1.02);
+.menu-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 16px 20px;
+    background: var(--fundo);
+    border: 1px solid var(--linha);
+    border-radius: 10px;
+    text-align: left;
+    transition: border-color 0.15s ease;
 }
 
-/* Quando erra: Fica vermelho e treme */
-.btn-wrong {
-    background-color: #e84118 !important;
-    color: white !important;
-    border-color: #c23616 !important;
-    animation: shake 0.4s; /* Chama a animação abaixo */
+.menu-btn:hover {
+    border-color: var(--linha-forte);
 }
 
-/* Animação de tremor (shake) */
-@keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
+.menu-titulo {
+    font-weight: 600;
+}
+
+.menu-desc {
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   QUIZ: CABEÇALHO E PLACAR
+   ========================================= */
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--linha);
+}
+
+.quiz-header h1 {
+    margin: 0;
+    font-size: 1.125rem;
+}
+
+.score {
+    margin: 40px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--linha);
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
+}
+
+.score span {
+    color: var(--tinta);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================
+   QUESTÃO
+   ========================================= */
+#question {
+    margin-bottom: 24px;
+}
+
+/* Textos de leitura (contexto e enunciado) em serifa */
+#question .contexto,
+#question .enunciado,
+#question .nota,
+#question .pergunta {
+    font-family: var(--serif);
+    font-size: 1.125rem;
+    line-height: 1.65;
+}
+
+.questao-titulo {
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Aquecimento da IA: o filete lateral separa do texto oficial */
+.nota {
+    padding-left: 16px;
+    border-left: 2px solid var(--linha-forte);
+}
+
+.status {
+    color: var(--tinta-suave);
+}
+
+.img-pergunta,
+.img-alternativa {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 16px 0;
+}
+
+/* =========================================
+   ALTERNATIVAS
+   ========================================= */
+.answer-buttons li + li {
+    margin-top: 8px;
+}
+
+.answer-buttons button {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--fundo);
+    border: 1px solid var(--linha);
+    border-radius: 10px;
+    text-align: left;
+    line-height: 1.5;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.answer-buttons button:hover:not(:disabled) {
+    border-color: var(--linha-forte);
+}
+
+.answer-buttons button:disabled {
+    cursor: default;
+    color: var(--tinta-suave);
+}
+
+/* Resultado: vem depois de :disabled para vencer na ordem */
+.answer-buttons button.btn-correct {
+    background: var(--acerto-fundo);
+    border-color: var(--acerto);
+    color: var(--acerto);
+    font-weight: 500;
+}
+
+.answer-buttons button.btn-wrong {
+    background: var(--erro-fundo);
+    border-color: var(--erro);
+    color: var(--erro);
+    font-weight: 500;
+    animation: tremor 0.3s;
+}
+
+/* Botão de avançar para a questão oficial */
+.answer-buttons li.avancar {
+    margin-top: 24px;
+}
+
+.answer-buttons button.btn-next {
+    background: var(--tinta);
+    border-color: var(--tinta);
+    color: var(--fundo);
+    font-weight: 500;
+}
+
+.answer-buttons button.btn-next:hover:not(:disabled) {
+    background: var(--destaque);
+    border-color: var(--destaque);
+}
+
+@keyframes tremor {
+    0%   { transform: translateX(0); }
+    25%  { transform: translateX(-4px); }
+    50%  { transform: translateX(4px); }
+    75%  { transform: translateX(-3px); }
     100% { transform: translateX(0); }
+}
+
+/* =========================================
+   RASCUNHO
+   ========================================= */
+#scratchpad-container {
+    margin-top: 40px;
+}
+
+.rascunho-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.rascunho-label {
+    margin: 0;
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
+}
+
+#drawing-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--fundo);
+    border: 1px solid var(--linha);
+    border-radius: 10px;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+/* =========================================
+   ACESSIBILIDADE
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 32px 16px 72px;
+    }
 }

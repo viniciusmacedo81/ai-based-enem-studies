@@ -38,7 +38,7 @@ function voltarAoMenu() {
 // CARREGAR QUESTÃO DO ENEM + IA PREPARATÓRIA
 // ==========================================
 async function carregarQuestao() {
-    questionElement.innerHTML = "Sorteando questão do ENEM...";
+    questionElement.innerHTML = '<p class="status">Sorteando questão do ENEM...</p>';
     answerButtonsElement.innerHTML = ""; 
     
     // Limpa o canvas se ainda estiver usando ele
@@ -79,7 +79,7 @@ async function carregarQuestao() {
         questaoEnemAtual = data;
 
         // 3. AGORA CHAMAMOS A IA PARA CRIAR O AQUECIMENTO
-        questionElement.innerHTML = "🧠 Inteligência Artificial criando um aquecimento para você...";
+        questionElement.innerHTML = '<p class="status">Criando um aquecimento com IA para você...</p>';
         
         const imagens = data.files || [];
         
@@ -110,7 +110,7 @@ async function carregarQuestao() {
 
     } catch (erro) {
         console.error("Erro ao carregar a questão:", erro);
-        questionElement.innerHTML = "Erro ao carregar a questão. Tente recarregar a página.";
+        questionElement.innerHTML = '<p class="status">Erro ao carregar a questão. Tente recarregar a página.</p>';
     }
 }
 
@@ -118,9 +118,9 @@ async function carregarQuestao() {
 // EXIBIR E CONTROLAR A QUESTÃO DA IA (AQUECIMENTO)
 // ==========================================
 function mostrarQuestaoPreparatoria() {
-    let textoCompleto = `<h2 style="color: #6c5ce7; margin-bottom: 15px;">🧠 Aquecimento IA</h2>`;
-    textoCompleto += `<p style="background: #f1f2f6; padding: 12px; border-radius: 8px; color: #333;">${questaoIAAtual.texto_preparatorio}</p>`;
-    textoCompleto += `<p><strong>${questaoIAAtual.pergunta}</strong></p>`;
+    let textoCompleto = `<h2 class="questao-titulo">Aquecimento com IA</h2>`;
+    textoCompleto += `<p class="nota">${questaoIAAtual.texto_preparatorio}</p>`;
+    textoCompleto += `<p class="pergunta"><strong>${questaoIAAtual.pergunta}</strong></p>`;
     
     questionElement.innerHTML = textoCompleto;
     answerButtonsElement.innerHTML = ""; 
@@ -147,14 +147,15 @@ function verificarRespostaIA(estaCorreta, botaoClicado) {
         botaoClicado.classList.add('btn-correct');
         
         // Cria botão para avançar para a questão oficial do ENEM
+        const liAvancar = document.createElement('li');
+        liAvancar.classList.add('avancar');
         const btnAvancar = document.createElement('button');
-        btnAvancar.innerText = "🌟 Muito bem! Clique aqui para encarar a questão do ENEM";
-        btnAvancar.style.backgroundColor = "#2d3436";
-        btnAvancar.style.color = "white";
-        btnAvancar.style.marginTop = "20px";
+        btnAvancar.classList.add('btn-next');
+        btnAvancar.innerText = "Muito bem! Clique aqui para encarar a questão do ENEM";
         btnAvancar.addEventListener('click', () => mostrarQuestao(questaoEnemAtual));
         
-        answerButtonsElement.appendChild(btnAvancar);
+        liAvancar.appendChild(btnAvancar);
+        answerButtonsElement.appendChild(liAvancar);
     } else {
         botaoClicado.classList.add('btn-wrong');
         setTimeout(() => {
@@ -172,20 +173,20 @@ function formatarMarkdown(texto) {
 }
 
 function mostrarQuestao(data) {
-    let textoCompleto = `<h2 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">${data.title}</h2>`;
+    let textoCompleto = `<h2 class="questao-titulo">${data.title}</h2>`;
     
     if (data.context) {
         let contextoFormatado = data.context.replace(
             /!\[.*?\]\((.*?)\)/g, 
-            '<img src="$1" class="img-pergunta" style="max-width: 100%; display: block; margin: 15px auto;">'
+            '<img src="$1" class="img-pergunta">'
         );
         let contextoComNegrito = formatarMarkdown(contextoFormatado);
-        textoCompleto += `<p>${contextoComNegrito.replace(/\n/g, '<br>')}</p>`;
+        textoCompleto += `<p class="contexto">${contextoComNegrito.replace(/\n/g, '<br>')}</p>`;
     }
     
     if (data.alternativesIntroduction) {
         let introComNegrito = formatarMarkdown(data.alternativesIntroduction);
-        textoCompleto += `<p><strong>${introComNegrito}</strong></p>`;
+        textoCompleto += `<p class="enunciado"><strong>${introComNegrito}</strong></p>`;
     }
     
     questionElement.innerHTML = textoCompleto;
@@ -196,7 +197,6 @@ function mostrarQuestao(data) {
                 const img = document.createElement('img');
                 img.src = linkDaImagem;
                 img.classList.add('img-pergunta');
-                img.style.maxWidth = "100%"; 
                 questionElement.appendChild(img);
             }
         });
@@ -214,7 +214,7 @@ function mostrarQuestao(data) {
         if (alternativa.file) {
             const imgAlt = document.createElement('img');
             imgAlt.src = alternativa.file;
-            imgAlt.style.maxWidth = "100%";
+            imgAlt.classList.add('img-alternativa');
             button.appendChild(document.createElement('br')); 
             button.appendChild(imgAlt);
         }
@@ -244,13 +244,6 @@ function verificarRespostaEnem(estaCorreta, botaoClicado) {
         carregarQuestao(); 
     }, 800);
 }
-// Função para transformar **texto** em <strong>texto</strong> de forma segura
-function formatarMarkdown(texto) {
-    if (!texto) return "";
-    // Substitui o primeiro ** por <strong> e o segundo ** por </strong>
-    return texto.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-}
-
 // ==========================================
 // LÓGICA DO CANVAS (RASCUNHO)
 // ==========================================
@@ -259,21 +252,33 @@ const ctx = canvas.getContext('2d');
 let desenhando = false;
 
 // Estilo do traço
-ctx.strokeStyle = '#1e293b';
+ctx.strokeStyle = '#15181c';
 ctx.lineWidth = 2.5;
 ctx.lineCap = 'round';
 ctx.lineJoin = 'round';
 
+// O canvas se ajusta à largura da tela via CSS, então convertemos a posição
+// do ponteiro (pixels da tela) para pixels internos do canvas.
+function posicaoNoCanvas(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
 // Eventos de Mouse (Computador)
 canvas.addEventListener('mousedown', (e) => {
     desenhando = true;
+    const pos = posicaoNoCanvas(e.clientX, e.clientY);
     ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
+    ctx.moveTo(pos.x, pos.y);
 });
 
 canvas.addEventListener('mousemove', (e) => {
     if (!desenhando) return;
-    ctx.lineTo(e.offsetX, e.offsetY);
+    const pos = posicaoNoCanvas(e.clientX, e.clientY);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 });
 
@@ -284,18 +289,18 @@ canvas.addEventListener('mouseout', () => desenhando = false);
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Evita que a tela role junto
     const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
+    const pos = posicaoNoCanvas(touch.clientX, touch.clientY);
     desenhando = true;
     ctx.beginPath();
-    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.moveTo(pos.x, pos.y);
 });
 
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     if (!desenhando) return;
     const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    const pos = posicaoNoCanvas(touch.clientX, touch.clientY);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 });
 
