@@ -28,13 +28,27 @@
                 <span class="menu-titulo">2º dia</span>
                 <span class="menu-desc">Matemática e Ciências da Natureza</span>
             </button>
+
+            <div class="menu-config">
+                <label class="toggle-ia">
+                    <input type="checkbox" id="toggle-ia" role="switch" checked>
+                    <span class="toggle-trilho" aria-hidden="true"></span>
+                    <span class="toggle-texto">
+                        <span class="toggle-titulo">Assistência de IA</span>
+                        <span class="toggle-desc">Cria uma questão de aquecimento antes de cada questão do ENEM. Desligada, você vai direto para a questão.</span>
+                    </span>
+                </label>
+            </div>
         </div>
 
         <!-- TELA DO QUIZ (fica escondida até você escolher uma opção) -->
         <div id="quiz-screen" style="display: none;">
             <header class="quiz-header">
                 <h1>Quiz ENEM</h1>
-                <button id="btn-voltar" class="btn-texto" onclick="voltarAoMenu()">Menu</button>
+                <div class="quiz-header-acoes">
+                    <button type="button" id="btn-ia" class="btn-texto">Desligar IA</button>
+                    <button type="button" id="btn-voltar" class="btn-texto" onclick="voltarAoMenu()">Menu</button>
+                </div>
             </header>
 
             <div id="question-container">

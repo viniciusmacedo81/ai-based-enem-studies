@@ -138,8 +138,84 @@ canvas:focus-visible {
 }
 
 /* =========================================
+   MENU: CONFIGURAÇÃO DA IA
+   ========================================= */
+.menu-config {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--linha);
+}
+
+.toggle-ia {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+}
+
+/* O checkbox real fica invisível, mas continua focável pelo teclado */
+.toggle-ia input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.toggle-trilho {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 24px;
+    margin-top: 1px;
+    border-radius: 12px;
+    background: #b5bbc4;
+    transition: background-color 0.15s ease;
+}
+
+.toggle-trilho::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--fundo);
+    transition: transform 0.15s ease;
+}
+
+.toggle-ia input:checked + .toggle-trilho {
+    background: var(--tinta);
+}
+
+.toggle-ia input:checked + .toggle-trilho::after {
+    transform: translateX(16px);
+}
+
+.toggle-ia input:focus-visible + .toggle-trilho {
+    outline: 2px solid var(--destaque);
+    outline-offset: 2px;
+}
+
+.toggle-titulo {
+    display: block;
+    font-weight: 600;
+}
+
+.toggle-desc {
+    display: block;
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
+}
+
+/* =========================================
    QUIZ: CABEÇALHO E PLACAR
    ========================================= */
+.quiz-header-acoes {
+    display: flex;
+    gap: 16px;
+}
+
 .quiz-header {
     display: flex;
     justify-content: space-between;
@@ -199,6 +275,21 @@ canvas:focus-visible {
 
 .status {
     color: var(--tinta-suave);
+}
+
+/* Botão para desistir da IA enquanto ela está gerando o aquecimento */
+.btn-pular {
+    padding: 8px 14px;
+    background: var(--fundo);
+    border: 1px solid var(--linha);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: border-color 0.15s ease;
+}
+
+.btn-pular:hover {
+    border-color: var(--linha-forte);
 }
 
 .img-pergunta,

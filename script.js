@@ -14,6 +14,14 @@ let modoSelecionado = 'ambos'; // Guarda a escolha do usuário ('ambos', 'dia1',
 let questaoEnemAtual = null;
 let questaoIAAtual = null;
 
+// Controle da assistência de IA
+let assistenciaIA = true;   // liga/desliga o aquecimento com IA
+let cargaId = 0;            // identifica a questão em andamento; respostas atrasadas são ignoradas
+let controladorIA = null;   // AbortController do pedido à IA que está em andamento
+
+const toggleIA = document.getElementById('toggle-ia');
+const botaoIA = document.getElementById('btn-ia');
+
 // ==========================================
 // FUNÇÕES DE NAVEGAÇÃO DO MENU
 // ==========================================
@@ -25,6 +33,9 @@ function iniciarQuiz(modo) {
 }
 
 function voltarAoMenu() {
+    // Cancela qualquer pedido em andamento e invalida respostas que ainda vão chegar
+    cancelarPedidoIA();
+    cargaId++;
     quizScreen.style.display = 'none';
     menuContainer.style.display = 'block';
     currentScore = 0;
@@ -32,12 +43,41 @@ function voltarAoMenu() {
 }
 
 // ==========================================
-// CARREGAR QUESTÃO DO ENEM + IA PREPARATÓRIA
+// ASSISTÊNCIA DE IA: LIGAR / DESLIGAR / CANCELAR
 // ==========================================
+function cancelarPedidoIA() {
+    if (controladorIA) {
+        controladorIA.abort();
+        controladorIA = null;
+    }
+}
+
+// Desiste do aquecimento que está sendo gerado e vai direto para a questão do ENEM
+function pularAquecimento() {
+    if (!controladorIA) return;
+    cancelarPedidoIA();
+    cargaId++; // a resposta da IA, se ainda chegar, será ignorada
+    mostrarQuestao(questaoEnemAtual);
+}
+
+function definirAssistenciaIA(ligada) {
+    assistenciaIA = ligada;
+    toggleIA.checked = ligada;
+    botaoIA.textContent = ligada ? 'Desligar IA' : 'Ligar IA';
+    // Desligou enquanto a IA ainda estava pensando: não faz sentido continuar esperando
+    if (!ligada) pularAquecimento();
+}
+
+toggleIA.addEventListener('change', () => definirAssistenciaIA(toggleIA.checked));
+botaoIA.addEventListener('click', () => definirAssistenciaIA(!assistenciaIA));
+
 // ==========================================
 // CARREGAR QUESTÃO DO ENEM + IA PREPARATÓRIA
 // ==========================================
 async function carregarQuestao() {
+    cancelarPedidoIA();
+    const id = ++cargaId;
+
     questionElement.innerHTML = '<p class="status">Sorteando questão do ENEM...</p>';
     answerButtonsElement.innerHTML = ""; 
     
@@ -58,6 +98,7 @@ async function carregarQuestao() {
 
         const resposta = await fetch(url);
         const data = await resposta.json(); 
+        if (id !== cargaId) return; // o usuário voltou ao menu enquanto carregava
 
         // 1. Trava de segurança para Língua Estrangeira
         if (data.language === 'es' || data.language === 'espanhol') {
@@ -78,14 +119,24 @@ async function carregarQuestao() {
         // Guardamos a questão oficial do ENEM
         questaoEnemAtual = data;
 
+        // Assistência desligada: vai direto para a questão oficial, sem chamar a IA
+        if (!assistenciaIA) {
+            mostrarQuestao(data);
+            return;
+        }
+
         // 3. AGORA CHAMAMOS A IA PARA CRIAR O AQUECIMENTO
-        questionElement.innerHTML = '<p class="status">Criando um aquecimento com IA para você...</p>';
+        questionElement.innerHTML = '<p class="status">Criando um aquecimento com IA para você...</p>'
+            + '<button type="button" id="btn-pular-ia" class="btn-pular">Pular aquecimento</button>';
+        document.getElementById('btn-pular-ia').addEventListener('click', pularAquecimento);
         
         const imagens = data.files || [];
-        
+
+        controladorIA = new AbortController();
         const respostaIA = await fetch('/api/preparatoria', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controladorIA.signal,
             body: JSON.stringify({
                 contexto: data.context,
                 enunciado: data.alternativesIntroduction,
@@ -94,7 +145,10 @@ async function carregarQuestao() {
         });
 
         // Lemos a resposta
-        questaoIAAtual = await respostaIA.json();
+        const respostaIAJson = await respostaIA.json();
+        if (id !== cargaId) return; // cancelada ou o usuário saiu da questão
+        controladorIA = null;
+        questaoIAAtual = respostaIAJson;
         
         // DEBUG: Imprime a resposta da IA no console para investigarmos!
         console.log("Resposta bruta da API / Gemini:", questaoIAAtual);
@@ -109,6 +163,9 @@ async function carregarQuestao() {
         }
 
     } catch (erro) {
+        // Cancelamento (pular, desligar a IA ou voltar ao menu) não é erro
+        if (id !== cargaId) return;
+        controladorIA = null;
         console.error("Erro ao carregar a questão:", erro);
         questionElement.innerHTML = '<p class="status">Erro ao carregar a questão. Tente recarregar a página.</p>';
     }
@@ -158,7 +215,9 @@ function verificarRespostaIA(estaCorreta, botaoClicado) {
         answerButtonsElement.appendChild(liAvancar);
     } else {
         botaoClicado.classList.add('btn-wrong');
+        const id = cargaId;
         setTimeout(() => {
+             if (id !== cargaId) return; // voltou ao menu nesse meio tempo
              mostrarQuestaoPreparatoria();
         }, 1200);
     }
@@ -240,7 +299,9 @@ function verificarRespostaEnem(estaCorreta, botaoClicado) {
     const todosOsBotoes = document.querySelectorAll('#answer-buttons button');
     todosOsBotoes.forEach(btn => btn.disabled = true);
     
+    const id = cargaId;
     setTimeout(() => {
+        if (id !== cargaId) return; // voltou ao menu nesse meio tempo
         carregarQuestao(); 
     }, 800);
 }
