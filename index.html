@@ -41,12 +41,53 @@
                 <div id="question">Carregando...</div>
                 <ul id="answer-buttons" class="answer-buttons"></ul>
 
-                <div id="scratchpad-container">
-                    <div class="rascunho-topo">
-                        <p class="rascunho-label">Rascunho para cálculos</p>
-                        <button id="clear-canvas" class="btn-texto">Limpar</button>
+                <!-- FERRAMENTAS: rascunho (desenho) e calculadora -->
+                <div id="tools">
+                    <div class="tools-tabs" role="tablist" aria-label="Ferramentas de apoio">
+                        <button type="button" id="tab-rascunho" class="tool-tab" role="tab" aria-selected="true" aria-controls="scratchpad-container">Rascunho</button>
+                        <button type="button" id="tab-calculadora" class="tool-tab" role="tab" aria-selected="false" aria-controls="calculadora" tabindex="-1">Calculadora</button>
                     </div>
-                    <canvas id="drawing-canvas" width="632" height="160"></canvas>
+
+                    <div id="scratchpad-container" role="tabpanel" aria-labelledby="tab-rascunho">
+                        <div class="rascunho-topo">
+                            <p class="rascunho-label">Rascunho para cálculos</p>
+                            <button id="clear-canvas" class="btn-texto">Limpar</button>
+                        </div>
+                        <canvas id="drawing-canvas" width="632" height="160"></canvas>
+                    </div>
+
+                    <div id="calculadora" class="calculadora" role="tabpanel" aria-labelledby="tab-calculadora" tabindex="-1" hidden>
+                        <div class="calc-visor" aria-live="polite">
+                            <div id="calc-historico" class="calc-historico"></div>
+                            <div id="calc-resultado" class="calc-resultado">0</div>
+                        </div>
+                        <div class="calc-teclas">
+                            <button type="button" class="calc-tecla calc-acao" data-tecla="C" aria-label="Limpar tudo">C</button>
+                            <button type="button" class="calc-tecla calc-acao" data-tecla="(" aria-label="Abrir parênteses">(</button>
+                            <button type="button" class="calc-tecla calc-acao" data-tecla=")" aria-label="Fechar parênteses">)</button>
+                            <button type="button" class="calc-tecla calc-op" data-tecla="÷" aria-label="Dividir">÷</button>
+
+                            <button type="button" class="calc-tecla" data-tecla="7">7</button>
+                            <button type="button" class="calc-tecla" data-tecla="8">8</button>
+                            <button type="button" class="calc-tecla" data-tecla="9">9</button>
+                            <button type="button" class="calc-tecla calc-op" data-tecla="×" aria-label="Multiplicar">×</button>
+
+                            <button type="button" class="calc-tecla" data-tecla="4">4</button>
+                            <button type="button" class="calc-tecla" data-tecla="5">5</button>
+                            <button type="button" class="calc-tecla" data-tecla="6">6</button>
+                            <button type="button" class="calc-tecla calc-op" data-tecla="−" aria-label="Subtrair">−</button>
+
+                            <button type="button" class="calc-tecla" data-tecla="1">1</button>
+                            <button type="button" class="calc-tecla" data-tecla="2">2</button>
+                            <button type="button" class="calc-tecla" data-tecla="3">3</button>
+                            <button type="button" class="calc-tecla calc-op" data-tecla="+" aria-label="Somar">+</button>
+
+                            <button type="button" class="calc-tecla" data-tecla="0">0</button>
+                            <button type="button" class="calc-tecla" data-tecla="," aria-label="Vírgula">,</button>
+                            <button type="button" class="calc-tecla calc-acao" data-tecla="apagar" aria-label="Apagar último dígito">←</button>
+                            <button type="button" class="calc-tecla calc-igual" data-tecla="=" aria-label="Calcular">=</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
