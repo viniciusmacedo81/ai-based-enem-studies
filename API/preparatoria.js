@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
 
-// Inicia a conexão com o Gemini usando a chave do seu arquivo .env
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export default async function handler(req, res) {
