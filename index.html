@@ -16,6 +16,25 @@
         <div id="menu-container">
             <h1>Escolha seu treino</h1>
             <p class="subtitulo">Selecione o que você quer focar hoje.</p>
+
+            <div class="modo-seletor" role="radiogroup" aria-label="Modo de jogo">
+                <label class="modo-opcao">
+                    <input type="radio" name="modo-jogo" value="treino" checked>
+                    <span class="modo-corpo">
+                        <span class="menu-titulo">Treino livre</span>
+                        <span class="menu-desc">Questões sem fim, no seu ritmo.</span>
+                    </span>
+                </label>
+                <label class="modo-opcao">
+                    <input type="radio" name="modo-jogo" value="run">
+                    <span class="modo-corpo">
+                        <span class="menu-titulo">Run</span>
+                        <span class="menu-desc">3 vidas, moedas e cartas. Errou 3, acabou.</span>
+                        <span class="menu-desc" id="recorde-menu" hidden></span>
+                    </span>
+                </label>
+            </div>
+
             <button class="menu-btn" onclick="iniciarQuiz('ambos')">
                 <span class="menu-titulo">Ambos os dias</span>
                 <span class="menu-desc">Geral</span>
@@ -29,13 +48,21 @@
                 <span class="menu-desc">Matemática e Ciências da Natureza</span>
             </button>
 
+            <details class="run-regras">
+                <summary>Como funciona a run</summary>
+                <p>Você começa com 3 vidas. Cada acerto avança um andar e rende 3 moedas; a cada 5 andares há uma sala do chefe, que paga 8.</p>
+                <p>Cada erro custa uma vida. Sem vidas, a run termina. Na run você vê a resposta certa depois de cada questão.</p>
+                <p>Cada run sorteia 3 cartas entre 9 possíveis. Gaste moedas nelas durante a questão: eliminar alternativas, pedir uma dica à IA, recuperar vida, entre outras.</p>
+                <p>O recorde de andares fica salvo neste navegador.</p>
+            </details>
+
             <div class="menu-config">
                 <label class="toggle-ia">
                     <input type="checkbox" id="toggle-ia" role="switch" checked>
                     <span class="toggle-trilho" aria-hidden="true"></span>
                     <span class="toggle-texto">
                         <span class="toggle-titulo">Assistência de IA</span>
-                        <span class="toggle-desc">Cria uma questão de aquecimento antes de cada questão do ENEM. Desligada, você vai direto para a questão.</span>
+                        <span class="toggle-desc">No treino livre, cria uma questão de aquecimento antes de cada questão do ENEM. Na run, libera a carta Dica relâmpago. Desligada, você vai direto para a questão.</span>
                     </span>
                 </label>
             </div>
@@ -51,9 +78,39 @@
                 </div>
             </header>
 
+            <!-- HUD DA RUN (só aparece no modo Run) -->
+            <div id="run-hud" class="run-hud" hidden>
+                <div id="run-vidas" class="run-vidas" role="img" aria-label="Vidas"></div>
+                <div class="run-andar">
+                    <span id="run-andar-num" class="run-andar-num">Andar 1</span>
+                    <span id="run-trilha" class="run-trilha" aria-hidden="true"></span>
+                    <span id="run-andar-sub" class="run-andar-sub"></span>
+                </div>
+                <div class="run-moedas">
+                    <svg class="icone-moeda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>
+                    <span id="run-moedas" class="run-moedas-num">0</span>
+                    <span class="run-rotulo">moedas</span>
+                </div>
+            </div>
+
             <div id="question-container">
                 <div id="question">Carregando...</div>
+                <div id="run-dica" class="run-dica" hidden aria-live="polite"></div>
                 <ul id="answer-buttons" class="answer-buttons"></ul>
+
+                <!-- RUN: efeitos ativos, resultado da questão e botão de continuar -->
+                <p id="run-efeitos" class="run-efeitos" hidden></p>
+                <p id="run-msg" class="run-msg" role="status" hidden></p>
+                <div id="run-acoes" class="run-acoes"></div>
+
+                <!-- RUN: cartas sorteadas para esta partida -->
+                <section id="run-loja" class="loja" hidden aria-label="Cartas da run">
+                    <div class="loja-topo">
+                        <h2>Cartas desta run</h2>
+                        <span class="loja-nota">Compre e use na questão atual.</span>
+                    </div>
+                    <ul id="run-cartas" class="cartas"></ul>
+                </section>
 
                 <!-- FERRAMENTAS: rascunho (desenho) e calculadora -->
                 <div id="tools">
@@ -108,7 +165,30 @@
             <p class="score">Streak de acertos: <span id="score">0</span></p>
         </div>
 
+        <!-- FIM DA RUN -->
+        <div id="run-fim" hidden>
+            <h1 id="run-fim-titulo" tabindex="-1">Fim da run</h1>
+            <p id="run-fim-sub" class="subtitulo"></p>
+            <dl class="run-stats">
+                <div><dt>Andares concluídos</dt><dd id="fim-andares">0</dd></div>
+                <div><dt>Acertos</dt><dd id="fim-acertos">0</dd></div>
+                <div><dt>Precisão</dt><dd id="fim-precisao">0%</dd></div>
+                <div><dt>Moedas ganhas</dt><dd id="fim-moedas">0</dd></div>
+                <div><dt>Cartas usadas</dt><dd id="fim-cartas">0</dd></div>
+                <div><dt>Recorde</dt><dd id="fim-recorde">0</dd></div>
+            </dl>
+            <p id="fim-novo-recorde" class="run-novo-recorde" hidden>Novo recorde.</p>
+            <button type="button" class="menu-btn" onclick="novaRun()">
+                <span class="menu-titulo">Nova run</span>
+                <span class="menu-desc" id="fim-nova-desc"></span>
+            </button>
+            <button type="button" class="menu-btn" onclick="voltarAoMenu()">
+                <span class="menu-titulo">Voltar ao menu</span>
+            </button>
+        </div>
+
     </main>
     <script src="script.js"></script>
+    <script src="run.js"></script>
 </body>
 </html>

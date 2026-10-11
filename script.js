@@ -7,8 +7,11 @@ const questionElement = document.getElementById('question');
 const answerButtonsElement = document.getElementById('answer-buttons');
 const scoreElement = document.getElementById('score');
 
+const fimRunElement = document.getElementById('run-fim');
+
 let currentScore = 0;
 let modoSelecionado = 'ambos'; // Guarda a escolha do usuário ('ambos', 'dia1', 'dia2')
+let modoJogo = 'treino';       // 'treino' (livre) ou 'run' (roguelike)
 
 // Variáveis para guardar temporariamente as questões
 let questaoEnemAtual = null;
@@ -25,19 +28,44 @@ const botaoIA = document.getElementById('btn-ia');
 // ==========================================
 // FUNÇÕES DE NAVEGAÇÃO DO MENU
 // ==========================================
+// Mostra uma das três telas: 'menu', 'quiz' ou 'fim' (resultado da run)
+function mostrarTela(tela) {
+    menuContainer.style.display = tela === 'menu' ? 'block' : 'none';
+    quizScreen.style.display = tela === 'quiz' ? 'block' : 'none';
+    fimRunElement.hidden = tela !== 'fim';
+    window.scrollTo(0, 0);
+}
+
+// Chamada pelos botões do menu: o modo (treino ou run) vem do seletor
 function iniciarQuiz(modo) {
+    const marcado = document.querySelector('input[name="modo-jogo"]:checked');
+    comecarJogo(modo, marcado ? marcado.value : 'treino');
+}
+
+function comecarJogo(modo, tipo) {
     modoSelecionado = modo;
-    menuContainer.style.display = 'none';
-    quizScreen.style.display = 'block';
+    modoJogo = tipo;
+    if (modoJogo === 'run') {
+        prepararTelaRun();
+    } else {
+        sairDoModoRun();
+    }
+    mostrarTela('quiz');
     carregarQuestao();
 }
 
 function voltarAoMenu() {
+    // Abandonar uma run em andamento perde o progresso; confirma antes
+    if (run && run.ativa && run.respondidas > 0 && !confirm('Abandonar a run? Seu progresso nela será perdido.')) {
+        return;
+    }
     // Cancela qualquer pedido em andamento e invalida respostas que ainda vão chegar
     cancelarPedidoIA();
+    cancelarDica();
     cargaId++;
-    quizScreen.style.display = 'none';
-    menuContainer.style.display = 'block';
+    if (run && run.ativa) encerrarRun();
+    mostrarTela('menu');
+    atualizarRecordeMenu();
     currentScore = 0;
     scoreElement.innerText = currentScore;
 }
@@ -65,7 +93,12 @@ function definirAssistenciaIA(ligada) {
     toggleIA.checked = ligada;
     botaoIA.textContent = ligada ? 'Desligar IA' : 'Ligar IA';
     // Desligou enquanto a IA ainda estava pensando: não faz sentido continuar esperando
-    if (!ligada) pularAquecimento();
+    if (!ligada) {
+        pularAquecimento();
+        cancelarDica();
+    }
+    // A carta "Dica relâmpago" depende da IA
+    if (run && run.ativa) atualizarLoja();
 }
 
 toggleIA.addEventListener('change', () => definirAssistenciaIA(toggleIA.checked));
@@ -74,19 +107,24 @@ botaoIA.addEventListener('click', () => definirAssistenciaIA(!assistenciaIA));
 // ==========================================
 // CARREGAR QUESTÃO DO ENEM + IA PREPARATÓRIA
 // ==========================================
-async function carregarQuestao() {
+async function carregarQuestao(tentativa = 0) {
     cancelarPedidoIA();
+    cancelarDica();
     const id = ++cargaId;
 
     questionElement.innerHTML = '<p class="status">Sorteando questão do ENEM...</p>';
-    answerButtonsElement.innerHTML = ""; 
-    
+    answerButtonsElement.innerHTML = "";
+    if (modoJogo === 'run') prepararCarregamentoRun();
+
     // Limpa o canvas se ainda estiver usando ele
     if (typeof limparCanvas === 'function') {
         limparCanvas();
     }
 
     try {
+        // Evita um laço infinito se a API só devolver questões inutilizáveis
+        if (tentativa > 15) throw new Error('Nenhuma questão válida encontrada');
+
         const randomYear = Math.floor(Math.random() * 7) + 2014;
         const randomQuestionIndex = Math.floor(Math.random() * 180) + 1;
         
@@ -100,27 +138,33 @@ async function carregarQuestao() {
         const data = await resposta.json(); 
         if (id !== cargaId) return; // o usuário voltou ao menu enquanto carregava
 
+        // 0. Questão inexistente, anulada ou sem gabarito: sorteia outra
+        if (!data || !Array.isArray(data.alternatives) || !data.alternatives.some(a => a.isCorrect)) {
+            return carregarQuestao(tentativa + 1);
+        }
+
         // 1. Trava de segurança para Língua Estrangeira
         if (data.language === 'es' || data.language === 'espanhol') {
-            return carregarQuestao(); 
+            return carregarQuestao(tentativa + 1);
         }
 
         // 2. Trava de segurança baseada no dia e na disciplina da API
         if (modoSelecionado === 'dia1') {
             if (data.discipline === 'matematica' || data.discipline === 'ciencias-natureza') {
-                return carregarQuestao();
+                return carregarQuestao(tentativa + 1);
             }
         } else if (modoSelecionado === 'dia2') {
             if (data.discipline === 'linguagens' || data.discipline === 'ciencias-humanas') {
-                return carregarQuestao();
+                return carregarQuestao(tentativa + 1);
             }
         }
 
         // Guardamos a questão oficial do ENEM
         questaoEnemAtual = data;
 
-        // Assistência desligada: vai direto para a questão oficial, sem chamar a IA
-        if (!assistenciaIA) {
+        // Na run não há aquecimento (o ritmo é parte do jogo); com a IA desligada no treino
+        // livre também vai direto para a questão oficial, sem chamar a IA
+        if (modoJogo === 'run' || !assistenciaIA) {
             mostrarQuestao(data);
             return;
         }
@@ -167,7 +211,9 @@ async function carregarQuestao() {
         if (id !== cargaId) return;
         controladorIA = null;
         console.error("Erro ao carregar a questão:", erro);
-        questionElement.innerHTML = '<p class="status">Erro ao carregar a questão. Tente recarregar a página.</p>';
+        questionElement.innerHTML = '<p class="status">Erro ao carregar a questão.</p>'
+            + '<button type="button" id="btn-tentar-de-novo" class="btn-pular">Tentar de novo</button>';
+        document.getElementById('btn-tentar-de-novo').addEventListener('click', () => carregarQuestao());
     }
 }
 
@@ -263,10 +309,11 @@ function mostrarQuestao(data) {
 
     answerButtonsElement.innerHTML = ""; 
     
-    data.alternatives.forEach(alternativa => {
+    data.alternatives.forEach((alternativa, indice) => {
         const li = document.createElement('li');
         const button = document.createElement('button');
-        
+        button.dataset.indice = indice;
+
         let textoAlt = formatarMarkdown(alternativa.text || "");
         button.innerHTML = `${alternativa.letter}) ${textoAlt}`;
         
@@ -278,11 +325,16 @@ function mostrarQuestao(data) {
             button.appendChild(imgAlt);
         }
 
-        button.addEventListener('click', (e) => verificarRespostaEnem(alternativa.isCorrect, e.target));
+        button.addEventListener('click', (e) => {
+            if (modoJogo === 'run') responderRun(indice, e.currentTarget);
+            else verificarRespostaEnem(alternativa.isCorrect, e.target);
+        });
 
         li.appendChild(button);
         answerButtonsElement.appendChild(li);
     });
+
+    if (modoJogo === 'run') iniciarQuestaoRun();
 }
 
 function verificarRespostaEnem(estaCorreta, botaoClicado) {
