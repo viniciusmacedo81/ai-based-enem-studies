@@ -33,6 +33,7 @@ function mostrarTela(tela) {
     menuContainer.style.display = tela === 'menu' ? 'block' : 'none';
     quizScreen.style.display = tela === 'quiz' ? 'block' : 'none';
     fimRunElement.hidden = tela !== 'fim';
+    document.getElementById('speed-fim').hidden = tela !== 'fim-speed';
     window.scrollTo(0, 0);
 }
 
@@ -50,13 +51,19 @@ function comecarJogo(modo, tipo) {
     } else {
         sairDoModoRun();
     }
+    if (modoJogo === 'speedrun') {
+        prepararSpeedrun();
+    } else {
+        sairDoSpeedrun();
+    }
     mostrarTela('quiz');
     carregarQuestao();
 }
 
 function voltarAoMenu() {
     // Abandonar uma run em andamento perde o progresso; confirma antes
-    if (run && run.ativa && run.respondidas > 0 && !confirm('Abandonar a run? Seu progresso nela será perdido.')) {
+    const emAndamento = (run && run.ativa && run.respondidas > 0) || (speed && speed.ativa && speed.acertos > 0);
+    if (emAndamento && !confirm('Abandonar a partida? Seu progresso nela será perdido.')) {
         return;
     }
     // Cancela qualquer pedido em andamento e invalida respostas que ainda vão chegar
@@ -64,8 +71,10 @@ function voltarAoMenu() {
     cancelarDica();
     cargaId++;
     if (run && run.ativa) encerrarRun();
+    if (speed && speed.ativa) encerrarSpeedrun();
     mostrarTela('menu');
     atualizarRecordeMenu();
+    atualizarRecordeSpeedMenu();
     currentScore = 0;
     scoreElement.innerText = currentScore;
 }
@@ -115,6 +124,7 @@ async function carregarQuestao(tentativa = 0) {
     questionElement.innerHTML = '<p class="status">Sorteando questão do ENEM...</p>';
     answerButtonsElement.innerHTML = "";
     if (modoJogo === 'run') prepararCarregamentoRun();
+    if (modoJogo === 'speedrun') prepararCarregamentoSpeed();
 
     // Limpa o canvas se ainda estiver usando ele
     if (typeof limparCanvas === 'function') {
@@ -164,7 +174,7 @@ async function carregarQuestao(tentativa = 0) {
 
         // Na run não há aquecimento (o ritmo é parte do jogo); com a IA desligada no treino
         // livre também vai direto para a questão oficial, sem chamar a IA
-        if (modoJogo === 'run' || !assistenciaIA) {
+        if (modoJogo !== 'treino' || !assistenciaIA) {
             mostrarQuestao(data);
             return;
         }
@@ -327,6 +337,7 @@ function mostrarQuestao(data) {
 
         button.addEventListener('click', (e) => {
             if (modoJogo === 'run') responderRun(indice, e.currentTarget);
+            else if (modoJogo === 'speedrun') responderSpeed(indice, e.currentTarget);
             else verificarRespostaEnem(alternativa.isCorrect, e.target);
         });
 
@@ -335,6 +346,7 @@ function mostrarQuestao(data) {
     });
 
     if (modoJogo === 'run') iniciarQuestaoRun();
+    if (modoJogo === 'speedrun') iniciarQuestaoSpeed();
 }
 
 function verificarRespostaEnem(estaCorreta, botaoClicado) {

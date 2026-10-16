@@ -531,9 +531,34 @@ canvas:focus-visible {
 /* =========================================
    MENU: SELETOR DE MODO E REGRAS DA RUN
    ========================================= */
+.menu-rotulo {
+    margin: 0 0 10px;
+    color: var(--tinta-suave);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Bolinha de seleção: deixa claro que o cartão escolhe o modo, não inicia nada */
+.modo-corpo::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--apagado);
+    border-radius: 50%;
+    background: var(--fundo);
+}
+
+.modo-opcao input:checked + .modo-corpo::after {
+    border-color: var(--tinta);
+    background: radial-gradient(circle, var(--tinta) 0 4px, var(--fundo) 5px);
+}
+
 .modo-seletor {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-bottom: 24px;
 }
@@ -556,8 +581,9 @@ canvas:focus-visible {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    position: relative;
     height: 100%;
-    padding: 14px 18px;
+    padding: 14px 44px 14px 18px;
     border: 1px solid var(--linha);
     border-radius: 10px;
     transition: border-color 0.15s ease;
@@ -761,8 +787,59 @@ canvas:focus-visible {
 }
 
 /* No modo Run o placar de streak é substituído pelo HUD */
-.modo-run .score {
+.modo-run .score,
+.modo-speedrun .score {
     display: none;
+}
+
+/* Na speedrun a IA fica sempre desligada: o botão some */
+.modo-speedrun #btn-ia {
+    display: none;
+}
+
+/* =========================================
+   SPEEDRUN: CRONÔMETRO
+   ========================================= */
+.speed-tempo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.speed-timer {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.speed-timer.urgente {
+    color: var(--erro);
+}
+
+.speed-barra {
+    grid-column: 1 / -1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--linha);
+    overflow: hidden;
+}
+
+.speed-barra span {
+    display: block;
+    height: 100%;
+    background: var(--tinta);
+}
+
+.speed-barra span.urgente {
+    background: var(--erro);
+}
+
+.run-ritmo {
+    margin: 0 0 16px;
+    color: var(--tinta-suave);
+    font-size: 0.9rem;
 }
 
 /* =========================================
@@ -908,6 +985,10 @@ canvas:focus-visible {
 }
 
 @media (max-width: 600px) {
+    .modo-seletor {
+        grid-template-columns: 1fr;
+    }
+
     .cartas {
         grid-template-columns: 1fr;
     }

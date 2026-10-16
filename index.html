@@ -17,6 +17,7 @@
             <h1>Escolha seu treino</h1>
             <p class="subtitulo">Selecione o que você quer focar hoje.</p>
 
+            <p class="menu-rotulo">1. Escolha o modo</p>
             <div class="modo-seletor" role="radiogroup" aria-label="Modo de jogo">
                 <label class="modo-opcao">
                     <input type="radio" name="modo-jogo" value="treino" checked>
@@ -33,8 +34,17 @@
                         <span class="menu-desc" id="recorde-menu" hidden></span>
                     </span>
                 </label>
+                <label class="modo-opcao">
+                    <input type="radio" name="modo-jogo" value="speedrun">
+                    <span class="modo-corpo">
+                        <span class="menu-titulo">Speedrun</span>
+                        <span class="menu-desc">4 minutos por questão. Errou ou estourou o tempo, acabou.</span>
+                        <span class="menu-desc" id="recorde-speed" hidden></span>
+                    </span>
+                </label>
             </div>
 
+            <p class="menu-rotulo">2. Escolha o conteúdo para começar</p>
             <button class="menu-btn" onclick="iniciarQuiz('ambos')">
                 <span class="menu-titulo">Ambos os dias</span>
                 <span class="menu-desc">Geral</span>
@@ -56,13 +66,21 @@
                 <p>O recorde de andares fica salvo neste navegador.</p>
             </details>
 
+            <details class="run-regras">
+                <summary>Como funciona a speedrun</summary>
+                <p>Cada questão tem 4 minutos. A prova real dá 3min40s por questão (90 questões em 5h30), então 4 minutos é um limite folgado de treino.</p>
+                <p>Quanto mais rápido você acerta, mais pontos ganha: de 1000 (resposta imediata) a 100 (no limite dos 4 minutos).</p>
+                <p>A run acaba no primeiro erro ou quando o tempo de uma questão se esgota. Não há assistência de IA e o relógio só corre enquanto você está na questão.</p>
+                <p>A melhor pontuação fica salva neste navegador.</p>
+            </details>
+
             <div class="menu-config">
                 <label class="toggle-ia">
                     <input type="checkbox" id="toggle-ia" role="switch" checked>
                     <span class="toggle-trilho" aria-hidden="true"></span>
                     <span class="toggle-texto">
                         <span class="toggle-titulo">Assistência de IA</span>
-                        <span class="toggle-desc">No treino livre, cria uma questão de aquecimento antes de cada questão do ENEM. Na run, libera a carta Dica relâmpago. Desligada, você vai direto para a questão.</span>
+                        <span class="toggle-desc">No treino livre, cria uma questão de aquecimento antes de cada questão do ENEM. Na run, libera a carta Dica relâmpago. Na speedrun, a IA fica sempre desligada. Desligada, você vai direto para a questão.</span>
                     </span>
                 </label>
             </div>
@@ -91,6 +109,23 @@
                     <span id="run-moedas" class="run-moedas-num">0</span>
                     <span class="run-rotulo">moedas</span>
                 </div>
+            </div>
+
+            <!-- HUD DA SPEEDRUN (só aparece no modo Speedrun) -->
+            <div id="speed-hud" class="run-hud speed-hud" hidden>
+                <div class="speed-tempo">
+                    <span class="run-rotulo">Tempo</span>
+                    <span id="speed-timer" class="speed-timer">4:00</span>
+                </div>
+                <div class="run-andar">
+                    <span id="speed-respondidas" class="run-andar-num">0 respondidas</span>
+                    <span class="run-andar-sub">Ritmo da prova: 3:40 por questão</span>
+                </div>
+                <div class="run-moedas">
+                    <span id="speed-score" class="run-moedas-num">0</span>
+                    <span class="run-rotulo">pontos</span>
+                </div>
+                <div class="speed-barra" aria-hidden="true"><span id="speed-barra"></span></div>
             </div>
 
             <div id="question-container">
@@ -165,6 +200,28 @@
             <p class="score">Streak de acertos: <span id="score">0</span></p>
         </div>
 
+        <!-- FIM DA SPEEDRUN -->
+        <div id="speed-fim" hidden>
+            <h1 id="speed-fim-titulo" tabindex="-1">Fim da speedrun</h1>
+            <p id="speed-fim-sub" class="subtitulo"></p>
+            <dl class="run-stats">
+                <div><dt>Pontuação</dt><dd id="sf-score">0</dd></div>
+                <div><dt>Questões respondidas</dt><dd id="sf-respondidas">0</dd></div>
+                <div><dt>Tempo médio por questão</dt><dd id="sf-media">-</dd></div>
+                <div><dt>Tempo total da run</dt><dd id="sf-total">0:00</dd></div>
+                <div><dt>Melhor pontuação</dt><dd id="sf-recorde">0</dd></div>
+            </dl>
+            <p id="sf-ritmo" class="run-ritmo"></p>
+            <p id="sf-novo-recorde" class="run-novo-recorde" hidden>Nova melhor pontuação.</p>
+            <button type="button" class="menu-btn" onclick="novaSpeedrun()">
+                <span class="menu-titulo">Nova speedrun</span>
+                <span class="menu-desc" id="sf-nova-desc"></span>
+            </button>
+            <button type="button" class="menu-btn" onclick="voltarAoMenu()">
+                <span class="menu-titulo">Voltar ao menu</span>
+            </button>
+        </div>
+
         <!-- FIM DA RUN -->
         <div id="run-fim" hidden>
             <h1 id="run-fim-titulo" tabindex="-1">Fim da run</h1>
@@ -190,5 +247,6 @@
     </main>
     <script src="script.js"></script>
     <script src="run.js"></script>
+    <script src="speedrun.js"></script>
 </body>
 </html>
