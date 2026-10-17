@@ -215,6 +215,7 @@ function encerrarRun() {
 
 function terminarRun() {
     const novoRecorde = encerrarRun();
+    Som.tocar('fim');
     const concluidos = run.andar - 1;
     const precisao = run.respondidas ? Math.round((run.acertos / run.respondidas) * 100) : 0;
 
@@ -370,6 +371,10 @@ function responderRun(indice, botao) {
         botao.classList.add('btn-correct');
         travarTodos();
 
+        Som.tocar(chefe ? 'chefe' : 'acerto');
+        Som.tocar('moeda', chefe ? 0.45 : 0.3);
+        if (curou) Som.tocar('cura', 0.55);
+
         const partes = [chefe ? 'Chefe derrotado.' : 'Correta.', `+${textoMoedas(ganho)}.`];
         if (curou) partes.push('Você recuperou 1 vida.');
         mostrarMensagem(partes.join(' '), { rotulo: 'Próximo andar', acao: () => carregarQuestao() });
@@ -382,6 +387,7 @@ function responderRun(indice, botao) {
         // Segunda chance: o primeiro erro não encerra a questão
         if (q.segunda) {
             q.segunda = false;
+            Som.tocar('erro');
             mostrarMensagem('Incorreta. Segunda chance: escolha outra alternativa.');
             atualizarEfeitos();
             atualizarLoja();
@@ -398,8 +404,11 @@ function responderRun(indice, botao) {
 
         const partes = [`Incorreta. A resposta certa é ${alternativas[certa].letter}.`];
         if (q.escudo) {
+            Som.tocar('carta');
             partes.push('O escudo absorveu o erro: nenhuma vida perdida.');
         } else {
+            Som.tocar('erro');
+            Som.tocar('vida', 0.25);
             run.vidas--;
             partes.push('Você perdeu 1 vida.');
         }
@@ -475,6 +484,7 @@ function comprarCarta(carta) {
 
     run.moedas -= carta.preco;
     run.cartasUsadas++;
+    Som.tocar(carta.id === 'cura' || carta.id === 'pocao' ? 'cura' : 'carta');
     const mensagem = carta.usar();
     if (carta.id === 'salto') return; // já está carregando outra questão
 
@@ -533,6 +543,7 @@ async function pedirDica(carta) {
         run.moedas -= carta.preco;
         run.cartasUsadas++;
         q.usadas.add('dica');
+        Som.tocar('carta');
 
         dicaElement.innerHTML = '<p class="run-dica-rotulo">Dica da IA</p><p class="run-dica-texto"></p>';
         dicaElement.querySelector('.run-dica-texto').textContent = json.dica;

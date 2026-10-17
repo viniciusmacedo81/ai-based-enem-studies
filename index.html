@@ -245,8 +245,39 @@
         </div>
 
     </main>
+
+    <!-- RÁDIO LOFI: player do YouTube sempre visível, com o crédito da transmissão -->
+    <aside id="radio" class="radio" aria-label="Rádio lofi">
+        <div class="radio-card">
+            <div class="radio-topo">
+                <h2>Rádio lofi</h2>
+                <span id="radio-estado" class="radio-estado" role="status">Parado</span>
+            </div>
+            <div id="radio-video" class="radio-video">
+                <p id="radio-vazio" class="radio-vazio">Clique em Tocar para carregar a transmissão.</p>
+            </div>
+            <p class="radio-faixa">
+                <span id="radio-nome" class="radio-nome"></span>
+                <a id="radio-link" class="radio-credito" href="#" target="_blank" rel="noopener noreferrer"></a>
+            </p>
+            <div class="radio-controles">
+                <button type="button" id="radio-anterior" class="radio-btn">Anterior</button>
+                <button type="button" id="radio-tocar" class="radio-btn radio-principal">Tocar</button>
+                <button type="button" id="radio-proxima" class="radio-btn">Próxima</button>
+            </div>
+            <div class="radio-volume">
+                <button type="button" id="radio-menos" class="radio-btn" aria-label="Diminuir o volume">−</button>
+                <span id="radio-volume" class="radio-volume-texto">Volume 50%</span>
+                <button type="button" id="radio-mais" class="radio-btn" aria-label="Aumentar o volume">+</button>
+            </div>
+            <button type="button" id="radio-efeitos" class="btn-texto radio-efeitos"></button>
+        </div>
+    </aside>
+
+    <script src="som.js"></script>
     <script src="script.js"></script>
     <script src="run.js"></script>
     <script src="speedrun.js"></script>
+    <script src="radio.js"></script>
 </body>
 </html>

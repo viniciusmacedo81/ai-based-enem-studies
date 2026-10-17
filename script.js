@@ -44,6 +44,7 @@ function iniciarQuiz(modo) {
 }
 
 function comecarJogo(modo, tipo) {
+    Som.tocar('clique');
     modoSelecionado = modo;
     modoJogo = tipo;
     if (modoJogo === 'run') {
@@ -258,6 +259,7 @@ function verificarRespostaIA(estaCorreta, botaoClicado) {
     
     if (estaCorreta) {
         botaoClicado.classList.add('btn-correct');
+        Som.tocar('acerto');
         
         // Cria botão para avançar para a questão oficial do ENEM
         const liAvancar = document.createElement('li');
@@ -271,6 +273,7 @@ function verificarRespostaIA(estaCorreta, botaoClicado) {
         answerButtonsElement.appendChild(liAvancar);
     } else {
         botaoClicado.classList.add('btn-wrong');
+        Som.tocar('erro');
         const id = cargaId;
         setTimeout(() => {
              if (id !== cargaId) return; // voltou ao menu nesse meio tempo
@@ -353,9 +356,11 @@ function verificarRespostaEnem(estaCorreta, botaoClicado) {
     if (estaCorreta) {
         currentScore++; 
         botaoClicado.classList.add('btn-correct');
+        Som.tocar('acerto');
     } else {
         currentScore = 0; 
         botaoClicado.classList.add('btn-wrong');
+        Som.tocar('erro');
     }
     
     scoreElement.innerText = currentScore;

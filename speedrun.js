@@ -96,6 +96,7 @@ function encerrarSpeedrun() {
 
 function terminarSpeedrun() {
     const novoRecorde = encerrarSpeedrun();
+    Som.tocar('fim');
     const media = speed.acertos ? speed.tempoAcertos / speed.acertos : null;
 
     document.getElementById('speed-fim-sub').textContent =
@@ -157,6 +158,13 @@ function tique(q) {
     if (!speed || speed.q !== q || q.respondida) return;
     const gasto = tempoGasto(q);
     renderizarSpeedHud(LIMITE_SEGUNDOS - gasto);
+
+    // Nos últimos 10 s, um tique por segundo
+    const segundo = Math.ceil(LIMITE_SEGUNDOS - gasto);
+    if (segundo <= 10 && segundo > 0 && q.ultimoTique !== segundo) {
+        q.ultimoTique = segundo;
+        Som.tocar('tique');
+    }
     if (gasto >= LIMITE_SEGUNDOS) tempoEsgotado(q);
 }
 
@@ -207,12 +215,14 @@ function responderSpeed(indice, botao) {
         speed.acertos++;
         speed.tempoAcertos += gasto;
         botao.classList.add('btn-correct');
+        Som.tocar('acerto');
         answerButtonsElement.querySelectorAll('button').forEach(b => b.disabled = true);
         renderizarSpeedHud(LIMITE_SEGUNDOS - gasto);
         mostrarMensagem(`Correta em ${formatarTempo(gasto)}. +${pontos} pontos.`,
             { rotulo: 'Próxima questão', acao: () => carregarQuestao() });
     } else {
         speed.motivo = 'erro';
+        Som.tocar('erro');
         botao.classList.add('btn-wrong');
         const letra = revelarCorreta();
         renderizarSpeedHud(LIMITE_SEGUNDOS - gasto);
@@ -226,6 +236,7 @@ function tempoEsgotado(q) {
     q.respondida = true;
     pararCronometro();
     speed.motivo = 'tempo';
+    Som.tocar('erro');
     speed.tempoTotal += LIMITE_SEGUNDOS;
     renderizarSpeedHud(0);
     const letra = revelarCorreta();
